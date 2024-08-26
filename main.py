@@ -16,29 +16,30 @@ class WeatherApp(QWidget):
         # get weather button
         self.get_weather = QPushButton("Get Weather Info", self)
         self.temperature_label = QLabel(self)
-    
-        # icon and description
+         
+        # icon, description and humidity
         self.emoji_label = QLabel(self)
         self.emoji_pixmap = QPixmap()
         self.description = QLabel(self)
-
+        self.humidity = QLabel(self)
         self.setUI()
-    def setUI(self):   
 
+    def setUI(self):   
         # create vertical box layout
         vbox = QVBoxLayout()
-        
-        self.emoji_label.setPixmap(self.emoji_pixmap)
+    
         vbox.addWidget(self.city_label)
         vbox.addWidget(self.city_input)
         vbox.addWidget(self.get_weather)
         vbox.addWidget(self.temperature_label)
+        vbox.addWidget(self.humidity)
         vbox.addWidget(self.description)
         vbox.addWidget(self.emoji_label)
         
         self.city_label.setAlignment(Qt.AlignCenter)
         self.city_input.setAlignment(Qt.AlignCenter)
         self.temperature_label.setAlignment(Qt.AlignCenter)
+        self.humidity.setAlignment(Qt.AlignCenter)
         self.emoji_label.setAlignment(Qt.AlignCenter)
         self.description.setAlignment(Qt.AlignCenter)
         self.setLayout(vbox)
@@ -46,6 +47,7 @@ class WeatherApp(QWidget):
         self.city_label.setObjectName("city_label")
         self.city_input.setObjectName("city_input")
         self.temperature_label.setObjectName("temperature_label")
+        self.humidity.setObjectName("humidity")
         self.get_weather.setObjectName("get_weather")
         self.emoji_label.setObjectName("emoji_label")
         self.description.setObjectName("description")
@@ -65,6 +67,10 @@ class WeatherApp(QWidget):
             QLabel#temperature_label {
                     font-size: 60px;
                 }
+            QLabel#humidity {
+                    font-size: 40px;
+                    font-weight: bold;
+                }
             QLabel#emoji_label {
                     font-size: 100px;
                 }
@@ -75,6 +81,11 @@ class WeatherApp(QWidget):
         """)
         self.get_weather.clicked.connect(self.get_weather_info)
         
+    def clearUI(self): 
+        self.temperature_label.setText("")
+        self.emoji_label.setPixmap(QPixmap())
+        self.description.setText("")
+
     def get_weather_info(self): 
         api_key = sys.argv[1]
         city_name = self.city_input.text()
@@ -82,14 +93,27 @@ class WeatherApp(QWidget):
         response = requests.get(url)
         if(response.status_code != 200):
             print("Error", response.status_code, "while gathering info")
+            self.clearUI()
+            
         else:
             weather_data = response.json()
-            self.temperature_label.setText(str(round(weather_data["main"]["temp"] - 273.15)) + "°C")
-            print(weather_data)
+            self.display_weather(weather_data)            
         
     
-    def display_weather(self, data):
-        pass
+    def display_weather(self, weather_data):
+        self.temperature_label.setText(str(round(weather_data["main"]["temp"] - 273.15)) + "°C")
+        self.description.setText(weather_data["weather"][0]["main"])
+        self.humidity.setText("Humidity: "+ str(weather_data["main"]["humidity"]) + "%")
+        code = weather_data["weather"][0]["icon"] 
+        self.getEmojiFromCode(code)
+        print(weather_data)
+
+    def getEmojiFromCode(self, code):
+        icon_url = f"https://openweathermap.org/img/wn/{code}@2x.png"
+        icon_request = requests.get(icon_url)
+        self.emoji_pixmap.loadFromData(icon_request.content)
+        self.emoji_label.setPixmap(self.emoji_pixmap)
+
 
 if __name__ == "__main__":
     if(len(sys.argv) == 1):
