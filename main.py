@@ -50,7 +50,7 @@ class WeatherApp(QWidget):
         self.setStyleSheet(""" 
             QLabel#city_label {
                     font-size: 40px;
-                    font-family: georgia;
+                    font-family: arial;
                 }
             QLineEdit#city_input {
                     font-size: 16px;
@@ -71,6 +71,13 @@ class WeatherApp(QWidget):
                 }
 
         """)
+        self.get_weather.clicked.connect(self.get_weather_info)
+        
+    def get_weather_info(self):
+        print("Weather gathered!")
+    
+    def display_weather(self, data):
+        pass
 
 if __name__ == "__main__":
     app = QApplication([])
