@@ -85,6 +85,7 @@ class WeatherApp(QWidget):
         self.temperature_label.setText("")
         self.emoji_label.setPixmap(QPixmap())
         self.description.setText("")
+        self.humidity.setText("")
 
     def get_weather_info(self): 
         api_key = sys.argv[1]
